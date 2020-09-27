@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+    
+    <link href="{{ url_for('static', filename='img/favicon.ico') }}" rel="icon" type="image/x-icon" />
+    
+
+</head>
+
+
+<body>
+<div class="content">
+    <h2>
+        Gerbera polievac ultra 3001
+    </h2>
+    <br>
+    <a href=# id="o_f">
+        <button id="turn_button" class="btn btn-primary" style="background-color:{{color}}">
+            on/off watering
+        </button>
+    </a>
+    <br>
+    <br>
+    <h5 class="label label-info">soil moisture: <span id="label_moist"></span></h5>
+
+</div>
+</body>
+
+
+<script type=text/javascript>
+
+    setInterval(function() {
+        var moist;
+        $.getJSON('/moisture',
+            function(data) {
+                moist = data['moisture']
+                $('#label_moist').text(moist);
+        });
+    }, 1000);
+        
+    setInterval(function() {
+        let moist = document.getElementById("label_moist").innerText
+        if(parseFloat(moist) < 0.3){
+            $('#turn_button').css('background-color', "#c10000");
+            $('#turn_button').prop('disabled', true);
+            $.getJSON('/one_time',
+                function(data) {
+                    $('#turn_button').css('background-color', data['color']);
+            });
+        }
+        else{
+            $('#turn_button').prop('disabled', false);
+        }
+    }, 50000);
+    
+    
+    $(function() {
+        $('a#o_f').bind('click', function() {
+            $.getJSON('/on_off',
+                function(data) {
+                    $('#turn_button').css('background-color', data['color'])
+            });
+        });
+    });
+    
+</script>
+</html>
