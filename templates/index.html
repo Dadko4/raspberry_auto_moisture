@@ -84,7 +84,9 @@
         let moist = await makeRequest('GET', '/moisture');
         let rain = await makeRequest('GET', '/rain?city='+city);
         moist = JSON.parse(moist).moisture
-        moist = JSON.parse(rain).rain
+        rain = JSON.parse(rain).rain
+        console.log(parseFloat(moist))
+        console.log(parseFloat(rain))
         if(parseFloat(moist) < 0.3 && parseFloat(rain) < 1.0){
             $('#turn_button').css('background-color', "#c10000");
             $('#turn_button').prop('disabled', true);
@@ -94,7 +96,7 @@
             $('#turn_button').prop('disabled', false);
         }
 
-    }, 20000);
+    }, 100000);
     
     $(function() {
         $('a#o_f').bind('click', async function() {
