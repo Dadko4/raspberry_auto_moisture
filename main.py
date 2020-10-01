@@ -1,4 +1,4 @@
-from flask import Flask, render_template, make_response, jsonify
+from flask import Flask, render_template, make_response, jsonify, request
 from gpiozero import MCP3008
 import RPi.GPIO as gpio
 import time
@@ -30,6 +30,7 @@ def init_output():
 @app.route('/rain')
 def get_rain():
     global rains
+    city = request.args.get('city', '')
     now_hour = datetime.now().hour
     for i in range(3):
         if (now_hour - i) % 3 == 0:
@@ -40,15 +41,18 @@ def get_rain():
     if rains is None or not next_hours.issubset(rains):
         url = ("http://api.openweathermap.org/data/2.5/forecast?"
                "q={city}&units=metric&"
-               "appid=4280c297a11c3965f90379ab64819a43").format(city='Jacovce')
-        r = requests.get(url)
-        weather_list = r.json()['list']
+               "appid=4280c297a11c3965f90379ab64819a43").format(city=city)
+        try:
+            r = requests.get(url)
+        except:
+            return jsonify({"rain": 0.0}), 200
+        weather_list = r.json().get('list', [])
         rains = {}
         for l in weather_list:
             key = l.get('dt_txt')
             if key is not None:
                 rains[key.split()[1]] = l.get('rain', {'3h': 0.0})['3h']
-    sel_rains = [rains[h] for h in next_hours]
+    sel_rains = [rains.get(h, 0.0) for h in next_hours]
     return jsonify({"rain": np.sum(sel_rains)}), 200
 
 

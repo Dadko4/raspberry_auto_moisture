@@ -36,7 +36,12 @@
     <br>
     <br>
     <h5 class="label label-info">soil moisture: <span id="label_moist"></span></h5>
-
+    <div class="form-group">
+        <select class="form-control" id="city_select">
+          <option>Nitra</option>
+          <option>Jacovce</option>
+        </select>
+    </div>
 </div>
 </body>
 
@@ -75,8 +80,9 @@
         
     
     setInterval(async function() {
+        let city = $('#city_select').val();
         let moist = await makeRequest('GET', '/moisture');
-        let rain = await makeRequest('GET', '/rain');
+        let rain = await makeRequest('GET', '/rain?city='+city);
         moist = JSON.parse(moist).moisture
         moist = JSON.parse(rain).rain
         if(parseFloat(moist) < 0.3 and rain < 1.0){
