@@ -33,9 +33,6 @@
             on/off watering
         </button>
     </a>
-    <br>
-    <br>
-    <h5 class="label label-info">soil moisture: <span id="label_moist"></span></h5>
     <a href=# id="mode">
         <button id="mode_button" class="btn btn-primary" value="ON" style="background-color:#2f7527">
             Outdoor mode
@@ -43,8 +40,11 @@
     </a>
     <br>
     <br>
+    <h5 class="label label-info">soil moisture: <span id="label_moist"></span></h5>
+    <br>
+    <br>
     <div class="form-group">
-        <select class="form-control" id="city_select">
+        <select class="form-control" style="widows: 300px;" id="city_select">
             {% for city in cities %}
                 <option>{{city}}</option>
             {% endfor %}
