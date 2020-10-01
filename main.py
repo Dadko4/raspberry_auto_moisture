@@ -37,8 +37,7 @@ def get_rain():
         if (now_hour - i) % 3 == 0:
             now_hour -= i
             break
-    next_hours = set(
-        [f'{h%24}:00:00' for h in range(now_hour, now_hour + 5, 3)])
+    next_hours = set(range(now_hour, now_hour + 5, 3))
     if rains is None or not next_hours.issubset(rains):
         url = ("http://api.openweathermap.org/data/2.5/forecast?"
                "q={city}&units=metric&"
@@ -52,7 +51,7 @@ def get_rain():
         for l in weather_list[:6]:
             key = l.get('dt_txt')
             if key is not None:
-                rains[key.split()[1]] = l.get('rain', {'3h': 0.0})['3h']
+                rains[int(key.split(":", 1)[0][-2:])] = l.get('rain', {'3h': 0.0})['3h']
     sel_rains = [rains.get(h, 0.0) for h in next_hours]
     return jsonify({"rain": np.sum(sel_rains)}), 200
 
