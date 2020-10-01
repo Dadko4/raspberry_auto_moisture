@@ -49,7 +49,7 @@ def get_rain():
             return jsonify({"rain": 0.0}), 200
         weather_list = r.json().get('list', [])
         rains = {}
-        for l in weather_list:
+        for l in weather_list[:6]:
             key = l.get('dt_txt')
             if key is not None:
                 rains[key.split()[1]] = l.get('rain', {'3h': 0.0})['3h']
