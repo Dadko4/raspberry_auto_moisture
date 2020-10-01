@@ -6,6 +6,7 @@ from datetime import datetime
 import numpy as np
 import requests
 state = None
+mode = None
 rains = None
 
 
@@ -101,14 +102,30 @@ def moisture():
     return jsonify({"moisture": moisture}), 200
 
 
+@app.route('/change_mode')
+def change_mode():
+    global mode
+    if mode == "OFF":
+        mode = "ON"
+        color = "#2f7527"
+    else:
+        mode = "OFF"
+        color = "#c10000"
+    return jsonify({"state": mode, "color": color}), 200
+
+
 @app.route('/', methods=['POST', 'GET'])
 def home():
     gpio.output(14, gpio.HIGH)
     state = gpio.HIGH
+    mode = "ON"
     color = "#123d94"
     moisture = get_moisture()
+    with open("mesta.txt", "r", encoding="utf-8") as f:
+        cities = f.readlines()
+    cities = [city.replace('\n', '') for city in cities]
     return render_template('index.html', color=color,
-                           moisture=moisture)
+                           moisture=moisture, cities=cities)
 
 
 if __name__ == '__main__':

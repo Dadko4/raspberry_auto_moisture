@@ -36,10 +36,16 @@
     <br>
     <br>
     <h5 class="label label-info">soil moisture: <span id="label_moist"></span></h5>
+    <a href=# id="mode">
+        <button id="mode_button" class="btn btn-primary" value="ON" style="background-color:{{color}}">
+            Outdoor mode
+        </button>
+    </a>
     <div class="form-group">
         <select class="form-control" id="city_select">
-          <option>Nitra</option>
-          <option>Jacovce</option>
+            {% for city in cities %}
+                <option>{{city}}</option>
+            {% endfor %}
         </select>
     </div>
 </div>
@@ -73,25 +79,28 @@
     }
 
     setInterval(async function() {
-        let moist = await makeRequest('GET', '/moisture');
-        moist = JSON.parse(moist)
+        let moist = makeRequest('GET', '/moisture');
+        moist = JSON.parse(moist);
         $('#label_moist').text(moist.moisture);
     }, 1000);
         
     
     setInterval(async function() {
-        let city = $('#city_select').val();
         let moist = await makeRequest('GET', '/moisture');
-        let rain = await makeRequest('GET', '/rain?city='+city);
-        moist = JSON.parse(moist).moisture
-        rain = JSON.parse(rain).rain
-        console.log(parseFloat(moist))
-        console.log(parseFloat(rain))
+        moist = JSON.parse(moist).moisture;
+        if($('#mode_button').val() == "ON"){
+            let city = $('#city_select').val();
+            let rain = await makeRequest('GET', '/rain?city='+city);
+            rain = JSON.parse(rain).rain;
+        }
+        else{
+            rain = 0.0;
+        }
         if(parseFloat(moist) < 0.3 && parseFloat(rain) < 1.0){
             $('#turn_button').css('background-color', "#c10000");
             $('#turn_button').prop('disabled', true);
             let color = await makeRequest('GET', '/one_time');
-            color = JSON.parse(color).color
+            color = JSON.parse(color).color;
             $('#turn_button').css('background-color', color);
             $('#turn_button').prop('disabled', false);
         }
@@ -101,8 +110,24 @@
     $(function() {
         $('a#o_f').bind('click', async function() {
             let color = await makeRequest('GET', '/on_off');
-            color = JSON.parse(color).color
+            color = JSON.parse(color).color;
             $('#turn_button').css('background-color', color);
+        });
+    });
+
+    $(function() {
+        $('a#mode').bind('click', async function() {
+            let response = await makeRequest('GET', '/change_mode');
+            color = JSON.parse(response).color;
+            state = JSON.parse(response).state;
+            $('#mode_button').css('background-color', color);
+            if(state == "hidden"){
+                $('#city_select').hide();
+            }
+            else{
+                $('#city_select').show();
+            }
+            $('#mode_button').val(state);
         });
     });
     
