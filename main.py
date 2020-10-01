@@ -5,6 +5,7 @@ import time
 import numpy as np
 from threading import Thread
 state = None
+# r = requests.get("http://api.openweathermap.org/data/2.5/forecast?q=Jacovce&units=metric&cnt=-1&appid=4280c297a11c3965f90379ab64819a43")
 divider = MCP3008(0)
 app = Flask(__name__)
 

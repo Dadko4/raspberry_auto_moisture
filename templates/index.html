@@ -43,37 +43,56 @@
 
 <script type=text/javascript>
 
-    setInterval(function() {
-        var moist;
-        $.getJSON('/moisture',
-            function(data) {
-                moist = data['moisture']
-                $('#label_moist').text(moist);
+    function makeRequest(method, url) {
+        return new Promise(function (resolve, reject) {
+            let xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(xhr.response);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
         });
+    }
+
+    setInterval(async function() {
+        let moist = await makeRequest('GET', '/moisture');
+        moist = JSON.parse(moist)
+        $('#label_moist').text(moist.moisture);
     }, 1000);
         
-    setInterval(function() {
-        let moist = document.getElementById("label_moist").innerText
+    
+    setInterval(async function() {
+        let moist = await makeRequest('GET', '/moisture');
+        //moist = JSON.parse(moist).moisture
         if(parseFloat(moist) < 0.3){
             $('#turn_button').css('background-color', "#c10000");
             $('#turn_button').prop('disabled', true);
-            $.getJSON('/one_time',
-                function(data) {
-                    $('#turn_button').css('background-color', data['color']);
-            });
-        }
-        else{
+            let color = await makeRequest('GET', '/one_time');
+            color = JSON.parse(color).color
+            $('#turn_button').css('background-color', color);
             $('#turn_button').prop('disabled', false);
         }
-    }, 50000);
-    
+
+    }, 20000);
     
     $(function() {
-        $('a#o_f').bind('click', function() {
-            $.getJSON('/on_off',
-                function(data) {
-                    $('#turn_button').css('background-color', data['color'])
-            });
+        $('a#o_f').bind('click', async function() {
+            let color = await makeRequest('GET', '/on_off');
+            color = JSON.parse(color).color
+            $('#turn_button').css('background-color', color);
         });
     });
     
