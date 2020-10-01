@@ -88,11 +88,12 @@
         
     
     setInterval(async function() {
+        let rain = 0.0;
         let moist = await makeRequest('GET', '/moisture');
         moist = JSON.parse(moist).moisture;
         if($('#mode_button').val() == "ON"){
             let city = $('#city_select').val();
-            let rain = await makeRequest('GET', '/rain?city='+city);
+            rain = await makeRequest('GET', '/rain?city='+city);
             rain = JSON.parse(rain).rain;
         }
         else{
