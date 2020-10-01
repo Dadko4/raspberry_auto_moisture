@@ -37,10 +37,12 @@
     <br>
     <h5 class="label label-info">soil moisture: <span id="label_moist"></span></h5>
     <a href=# id="mode">
-        <button id="mode_button" class="btn btn-primary" value="ON" style="background-color:{{color}}">
+        <button id="mode_button" class="btn btn-primary" value="ON" style="background-color:#2f7527">
             Outdoor mode
         </button>
     </a>
+    <br>
+    <br>
     <div class="form-group">
         <select class="form-control" id="city_select">
             {% for city in cities %}
@@ -79,7 +81,7 @@
     }
 
     setInterval(async function() {
-        let moist = makeRequest('GET', '/moisture');
+        let moist = await makeRequest('GET', '/moisture');
         moist = JSON.parse(moist);
         $('#label_moist').text(moist.moisture);
     }, 1000);
@@ -120,6 +122,8 @@
             let response = await makeRequest('GET', '/change_mode');
             color = JSON.parse(response).color;
             state = JSON.parse(response).state;
+            console.log(color)
+            console.log(state)
             $('#mode_button').css('background-color', color);
             if(state == "hidden"){
                 $('#city_select').hide();
