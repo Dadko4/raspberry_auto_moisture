@@ -85,7 +85,7 @@
         let rain = await makeRequest('GET', '/rain?city='+city);
         moist = JSON.parse(moist).moisture
         moist = JSON.parse(rain).rain
-        if(parseFloat(moist) < 0.3 and rain < 1.0){
+        if(parseFloat(moist) < 0.3 && parseFloat(rain) < 1.0){
             $('#turn_button').css('background-color', "#c10000");
             $('#turn_button').prop('disabled', true);
             let color = await makeRequest('GET', '/one_time');
