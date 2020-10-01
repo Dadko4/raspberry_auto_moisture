@@ -2,12 +2,16 @@ from flask import Flask, render_template, make_response, jsonify
 from gpiozero import MCP3008
 import RPi.GPIO as gpio
 import time
+from datetime import datetime
 import numpy as np
-from threading import Thread
+import requests
 state = None
-# r = requests.get("http://api.openweathermap.org/data/2.5/forecast?q=Jacovce&units=metric&cnt=-1&appid=4280c297a11c3965f90379ab64819a43")
+rains = None
+
+
 divider = MCP3008(0)
 app = Flask(__name__)
+
 
 def get_moisture():
     values = []
@@ -15,12 +19,39 @@ def get_moisture():
         values.append(float(divider.value))
         time.sleep(0.01)
     return round(1 - np.mean(values), 2)
-    
+
+
 @app.before_first_request
 def init_output():
     gpio.setup(14, gpio.OUT)
     gpio.output(14, gpio.HIGH)
-    
+
+
+@app.route('/rain')
+def get_rain():
+    global rains
+    now_hour = datetime.now().hour
+    for i in range(3):
+        if (now_hour - i) % 3 == 0:
+            now_hour -= i
+            break
+    next_hours = set(
+        [f'{h%24}:00:00' for h in range(now_hour, now_hour + 5, 3)])
+    if rains is None or not next_hours.issubset(rains):
+        url = ("http://api.openweathermap.org/data/2.5/forecast?"
+               "q={city}&units=metric&"
+               "appid=4280c297a11c3965f90379ab64819a43").format(city='Jacovce')
+        r = requests.get(url)
+        weather_list = r.json()['list']
+        rains = {}
+        for l in weather_list:
+            key = l.get('dt_txt')
+            if key is not None:
+                rains[key.split()[1]] = l.get('rain', {'3h': 0.0})['3h']
+    sel_rains = [rains[h] for h in next_hours]
+    return jsonify({"rain": np.sum(sel_rains)}), 200
+
+
 @app.route('/off')
 def off():
     global state
@@ -28,7 +59,8 @@ def off():
     state = gpio.HIGH
     color = "#123d94"
     return jsonify({"color": color}), 200
-    
+
+
 @app.route('/on')
 def on():
     global state
@@ -36,7 +68,8 @@ def on():
     state = gpio.LOW
     color = "#c10000"
     return jsonify({"color": color}), 200
-    
+
+
 @app.route('/one_time')
 def one_time():
     for _ in range(5):
@@ -48,6 +81,7 @@ def one_time():
     color = "#123d94"
     return jsonify({"color": color}), 200
 
+
 @app.route('/on_off')
 def on_off():
     global state
@@ -56,10 +90,12 @@ def on_off():
     else:
         return off()
 
+
 @app.route('/moisture')
-def moisture_route():
+def moisture():
     moisture = get_moisture()
     return jsonify({"moisture": moisture}), 200
+
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
@@ -70,6 +106,6 @@ def home():
     return render_template('index.html', color=color,
                            moisture=moisture)
 
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=14000)
-

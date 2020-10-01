@@ -76,8 +76,10 @@
     
     setInterval(async function() {
         let moist = await makeRequest('GET', '/moisture');
-        //moist = JSON.parse(moist).moisture
-        if(parseFloat(moist) < 0.3){
+        let rain = await makeRequest('GET', '/rain');
+        moist = JSON.parse(moist).moisture
+        moist = JSON.parse(rain).rain
+        if(parseFloat(moist) < 0.3 and rain < 1.0){
             $('#turn_button').css('background-color', "#c10000");
             $('#turn_button').prop('disabled', true);
             let color = await makeRequest('GET', '/one_time');
