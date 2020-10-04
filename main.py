@@ -76,11 +76,13 @@ def on():
 
 @app.route('/one_time')
 def one_time():
-    for _ in range(5):
+    while True:
         gpio.output(14, gpio.LOW)
         time.sleep(1.2)
         gpio.output(14, gpio.HIGH)
         time.sleep(1)
+        if get_moisture() > 0.7:
+            break
     state = gpio.HIGH
     color = "#123d94"
     return jsonify({"color": color}), 200
