@@ -122,7 +122,7 @@ def home():
     mode = "ON"
     color = "#123d94"
     moisture = get_moisture()
-    with open("mesta.txt", "r", encoding="utf-8") as f:
+    with open(r"./mesta.txt", "r", encoding="utf-8") as f:
         cities = f.readlines()
     cities = [city.replace('\n', '') for city in cities]
     return render_template('index.html', color=color,
