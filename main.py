@@ -5,6 +5,9 @@ import time
 from datetime import datetime
 import numpy as np
 import requests
+import os 
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 state = None
 mode = None
 rains = None
@@ -122,7 +125,7 @@ def home():
     mode = "ON"
     color = "#123d94"
     moisture = get_moisture()
-    with open(r"./mesta.txt", "r", encoding="utf-8") as f:
+    with open(f"{dir_path}/mesta.txt", "r", encoding="utf-8") as f:
         cities = f.readlines()
     cities = [city.replace('\n', '') for city in cities]
     return render_template('index.html', color=color,
