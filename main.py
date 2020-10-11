@@ -75,14 +75,12 @@ def background():
         time.sleep(15)
         
 
-
 @app.before_first_request
 def init_output():
     gpio.setup(14, gpio.OUT)
     gpio.output(14, gpio.HIGH)
-    # x = threading.Thread(target=background, args=())
-    # x.start()
-
+    x = threading.Thread(target=background, args=())
+    x.start()
 
 
 @app.route('/off')
