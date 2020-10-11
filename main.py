@@ -5,17 +5,19 @@ import time
 from datetime import datetime
 import numpy as np
 import requests
-import os 
+import os
+import threading
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 state = None
 mode = None
 rains = None
+city = None
+city_change = False
 
 
 divider = MCP3008(0)
 app = Flask(__name__)
-
 
 def get_moisture():
     values = []
@@ -24,31 +26,26 @@ def get_moisture():
         time.sleep(0.01)
     return round(1 - np.mean(values), 2)
 
-
-@app.before_first_request
-def init_output():
-    gpio.setup(14, gpio.OUT)
-    gpio.output(14, gpio.HIGH)
-
-
-@app.route('/rain')
 def get_rain():
-    global rains
-    city = request.args.get('city', '')
+    global rains, city, city_change, mode
+    if city == "None":
+        return 0.0
     now_hour = datetime.now().hour
     for i in range(3):
         if (now_hour - i) % 3 == 0:
             now_hour -= i
             break
     next_hours = set(range(now_hour, now_hour + 5, 3))
-    if rains is None or not next_hours.issubset(rains):
+    if mode == "ON" and (city_change or 
+                         rains is None or
+                         not next_hours.issubset(rains)):
         url = ("http://api.openweathermap.org/data/2.5/forecast?"
                "q={city}&units=metric&"
                "appid=4280c297a11c3965f90379ab64819a43").format(city=city)
         try:
             r = requests.get(url)
         except:
-            return jsonify({"rain": 0.0}), 200
+            return 0.0
         weather_list = r.json().get('list', [])
         rains = {}
         for l in weather_list[:6]:
@@ -56,7 +53,36 @@ def get_rain():
             if key is not None:
                 rains[int(key.split(":", 1)[0][-2:])] = l.get('rain', {'3h': 0.0})['3h']
     sel_rains = [rains.get(h, 0.0) for h in next_hours]
-    return jsonify({"rain": np.sum(sel_rains)}), 200
+    return np.sum(sel_rains)
+
+def one_time():
+    while True:
+        gpio.output(14, gpio.LOW)
+        time.sleep(1.2)
+        gpio.output(14, gpio.HIGH)
+        time.sleep(1)
+        if get_moisture() > 0.7:
+            break
+    state = gpio.HIGH
+
+
+def background():
+    while true:
+        moist = get_moisture()
+        rain = get_rain()
+        if moist < 0.3 and rain < 1.0:
+            one_time()
+        time.sleep(15)
+        
+
+
+@app.before_first_request
+def init_output():
+    gpio.setup(14, gpio.OUT)
+    gpio.output(14, gpio.HIGH)
+    x = threading.Thread(target=background, args=())
+    x.start()
+
 
 
 @app.route('/off')
@@ -68,26 +94,23 @@ def off():
     return jsonify({"color": color}), 200
 
 
+@app.route('/set_city')
+def off():
+    global city, city_change
+    new_city = request.args.get('city', '')
+    if new_city != city:
+        city = new_city
+        city_change = True
+    else:
+        city_change = False
+
+
 @app.route('/on')
 def on():
     global state
     gpio.output(14, gpio.LOW)
     state = gpio.LOW
     color = "#c10000"
-    return jsonify({"color": color}), 200
-
-
-@app.route('/one_time')
-def one_time():
-    while True:
-        gpio.output(14, gpio.LOW)
-        time.sleep(1.2)
-        gpio.output(14, gpio.HIGH)
-        time.sleep(1)
-        if get_moisture() > 0.7:
-            break
-    state = gpio.HIGH
-    color = "#123d94"
     return jsonify({"color": color}), 200
 
 
