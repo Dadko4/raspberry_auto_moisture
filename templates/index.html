@@ -55,7 +55,7 @@
 
 
 <script type=text/javascript>
-    this.city = "";
+    
     function makeRequest(method, url) {
         return new Promise(function (resolve, reject) {
             let xhr = new XMLHttpRequest();
@@ -89,10 +89,12 @@
     $(function() {
         $('#city_select').bind('click', async function() {
             if($('#mode_button').val() == "ON"){
+                city = await makeRequest('GET', '/get_city');
+                city = JSON.parse(city).city;
                 let new_city = $('#city_select').val();
-                if this.city != new_city{
+                if city != new_city{
                     await makeRequest('GET', '/set_city?city='+new_city);
-                    this.city = new_city;
+                    city = new_city;
                 }
             }
         });
