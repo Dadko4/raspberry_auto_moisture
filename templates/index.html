@@ -90,9 +90,9 @@
         $('#city_select').bind('click', async function() {
             if($('#mode_button').val() == "ON"){
                 let new_city = $('#city_select').val();
-                if window.city != new_city{
+                if this.city != new_city{
                     await makeRequest('GET', '/set_city?city='+new_city);
-                    window.city = new_city;
+                    this.city = new_city;
                 }
             }
         });
