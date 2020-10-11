@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 import requests
 import os
-import thread
+import _thread
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 state = None
@@ -82,7 +82,7 @@ def background():
 def init_output():
     gpio.setup(14, gpio.OUT)
     gpio.output(14, gpio.HIGH)
-    thread.start_new_thread(background, ())
+    _thread.start_new_thread(background, ())
 
 
 @app.route('/off')
