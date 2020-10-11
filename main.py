@@ -80,8 +80,8 @@ def background():
 def init_output():
     gpio.setup(14, gpio.OUT)
     gpio.output(14, gpio.HIGH)
-    x = threading.Thread(target=background, args=())
-    x.start()
+    # x = threading.Thread(target=background, args=())
+    # x.start()
 
 
 
