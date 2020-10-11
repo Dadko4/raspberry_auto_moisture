@@ -28,7 +28,7 @@ def get_moisture():
 
 def get_rain():
     global rains, city, city_change, mode
-    if city == "None":
+    if city == "None" or mode == "OFF":
         return 0.0
     now_hour = datetime.now().hour
     for i in range(3):
