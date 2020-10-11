@@ -67,7 +67,7 @@ def one_time():
 
 
 def background():
-    while true:
+    while True:
         moist = get_moisture()
         rain = get_rain()
         if moist < 0.3 and rain < 1.0:
