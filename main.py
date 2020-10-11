@@ -65,7 +65,7 @@ def one_time():
         time.sleep(1.2)
         gpio.output(14, gpio.HIGH)
         time.sleep(1)
-        if get_moisture() > 0.7:
+        if get_moisture() > 0.55:
             break
     state = gpio.HIGH
 
