@@ -19,12 +19,14 @@ city_change = False
 divider = MCP3008(0)
 app = Flask(__name__)
 
+
 def get_moisture():
     values = []
     for _ in range(10):
         values.append(float(divider.value))
         time.sleep(0.01)
     return round(1 - np.mean(values), 2)
+
 
 def get_rain():
     global rains, city, city_change, mode
@@ -80,8 +82,10 @@ def background():
 
 @app.before_first_request
 def init_output():
+    global mode
     gpio.setup(14, gpio.OUT)
     gpio.output(14, gpio.HIGH)
+    mode = "OFF"
     _thread.start_new_thread(background, ())
 
 
