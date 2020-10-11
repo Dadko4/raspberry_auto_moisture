@@ -95,7 +95,7 @@ def off():
 
 
 @app.route('/set_city')
-def off():
+def set_city():
     global city, city_change
     new_city = request.args.get('city', '')
     if new_city != city:
