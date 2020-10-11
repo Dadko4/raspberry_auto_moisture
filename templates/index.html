@@ -89,12 +89,11 @@
     $(function() {
         $('#city_select').bind('click', async function() {
             if($('#mode_button').val() == "ON"){
-                city = await makeRequest('GET', '/get_city');
-                city = JSON.parse(city).city;
+                let old_city = await makeRequest('GET', '/get_city');
+                old_city = JSON.parse(old_city).city;
                 let new_city = $('#city_select').val();
-                if city != new_city{
+                if old_city != new_city{
                     await makeRequest('GET', '/set_city?city='+new_city);
-                    city = new_city;
                 }
             }
         });
