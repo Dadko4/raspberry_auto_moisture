@@ -108,7 +108,7 @@ def set_city():
     else:
         city_change = False
 
-@app.route('/set_city')
+@app.route('/get_city')
 def get_city():
     global city
     return jsonify({"city": city})
