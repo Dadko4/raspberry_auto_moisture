@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 import requests
 import os
-import threading
+import thread
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 state = None
@@ -55,7 +55,9 @@ def get_rain():
     sel_rains = [rains.get(h, 0.0) for h in next_hours]
     return np.sum(sel_rains)
 
+
 def one_time():
+    global state
     while True:
         gpio.output(14, gpio.LOW)
         time.sleep(1.2)
@@ -67,20 +69,20 @@ def one_time():
 
 
 def background():
+    time.sleep(5)
     while True:
         moist = get_moisture()
         rain = get_rain()
         if moist < 0.3 and rain < 1.0:
             one_time()
         time.sleep(15)
-        
+       
 
 @app.before_first_request
 def init_output():
     gpio.setup(14, gpio.OUT)
     gpio.output(14, gpio.HIGH)
-    x = threading.Thread(target=background, args=())
-    x.start()
+    thread.start_new_thread(background, ())
 
 
 @app.route('/off')
